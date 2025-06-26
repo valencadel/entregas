@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfumería Elegance - Marketplace</title>
+    <script defer src="js/script.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1>Perfumería Elegance</h1>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="#home">Inicio</a></li>
+                    <li><a href="#products">Perfumes</a></li>
+                    <li><a href="#cart" id="cart-link">Carrito (<span id="cart-count">0</span>)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" id="home">
+            <div class="container">
+                <div class="hero-content">
+                    <h2>Descubre tu fragancia perfecta</h2>
+                    <p>Explora nuestra exclusiva colección de perfumes de las mejores marcas del mundo</p>
+                    <button class="cta-button" onclick="scrollToProducts()">Ver Perfumes</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="products-section" id="products">
+            <div class="container">
+                <h2 class="section-title">Nuestros Perfumes</h2>
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="all">Todos</button>
+                    <button class="filter-btn" data-filter="mujer">Mujer</button>
+                    <button class="filter-btn" data-filter="hombre">Hombre</button>
+                    <button class="filter-btn" data-filter="unisex">Unisex</button>
+                </div>
+                <div class="products-grid" id="products-grid">
+                    <!-- ACA SE CARGAN LOS PRODUCTOS -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- CARRITO SIDEBAR -->
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <aside class="cart-section" id="cart">
+        <div class="cart-header">
+            <h2>Tu Carrito</h2>
+            <button class="close-cart" id="close-cart">&times;</button>
+        </div>
+        <div id="cart-items" class="cart-items">
+            <!-- ACA SE CARGAN LOS ITEMS DEL CARRITO -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <h3>Total: $<span id="cart-total">0</span></h3>
+            </div>
+            <div class="cart-buttons">
+                <button class="checkout-btn" onclick="checkout()">Finalizar Compra</button>
+                <button class="clear-cart-btn" onclick="clearCart()">Vaciar Carrito</button>
+            </div>
+        </div>
+    </aside>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Perfumería Elegance. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
