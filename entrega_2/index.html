@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfumería Elegance - Marketplace</title>
+    <title>Pokemon Store - Marketplace</title>
     <script defer src="js/script.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
             <nav class="nav">
                 <ul>
                     <li><a href="#home">Inicio</a></li>
-                    <li><a href="#products">Perfumes</a></li>
+                    <li><a href="#pokemons">Pokemons</a></li>
                     <li><a href="#cart" id="cart-link">Carrito (<span id="cart-count">0</span>)</a></li>
                 </ul>
             </nav>
@@ -28,23 +28,28 @@
         <section class="hero" id="home">
             <div class="container">
                 <div class="hero-content">
-                    <h2>Descubre tu fragancia perfecta</h2>
-                    <p>Explora nuestra exclusiva colección de perfumes de las mejores marcas del mundo</p>
-                    <button class="cta-button" onclick="scrollToProducts()">Ver Perfumes</button>
+                    <h2>Gotta Catch 'Em All!</h2>
+                    <p>Explora nuestra tienda de Pokemons!</p>
+                    <button class="cta-button" id="scroll-to-products-btn">Ver Pokemons</button>
                 </div>
             </div>
         </section>
 
-        <section class="products-section" id="products">
+        <section class="pokemons-section" id="pokemons">
             <div class="container">
-                <h2 class="section-title">Nuestros Perfumes</h2>
-                <div class="filters">
-                    <button class="filter-btn active" data-filter="all">Todos</button>
-                    <button class="filter-btn" data-filter="mujer">Mujer</button>
-                    <button class="filter-btn" data-filter="hombre">Hombre</button>
-                    <button class="filter-btn" data-filter="unisex">Unisex</button>
+                <h2 class="section-title"></h2>
+                <div class="pokemons-container">
+                    <input type="text" id="search-input" placeholder="Ingresar nombre o ID">
+                    <button id="search-button">Buscar</button>
                 </div>
-                <div class="products-grid" id="products-grid">
+                <div class="filters">
+                    <label for="type-filter">Filtrar por tipo:</label>
+                    <select id="type-filter" class="filter-dropdown">
+                        <option value="all">Todos</option>
+                        <!-- Types will be loaded dynamically -->
+                    </select>
+                </div>
+                <div class="pokemons-grid" id="pokemons-grid">
                     <!-- ACA SE CARGAN LOS PRODUCTOS -->
                 </div>
             </div>
@@ -66,15 +71,15 @@
                 <h3>Total: $<span id="cart-total">0</span></h3>
             </div>
             <div class="cart-buttons">
-                <button class="checkout-btn" onclick="checkout()">Finalizar Compra</button>
-                <button class="clear-cart-btn" onclick="clearCart()">Vaciar Carrito</button>
+                <button class="checkout-btn" id="checkout-btn">Finalizar Compra</button>
+                <button class="clear-cart-btn" id="clear-cart-btn">Vaciar Carrito</button>
             </div>
         </div>
     </aside>
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 Perfumería Elegance. Todos los derechos reservados.</p>
+            <p>&copy; 2024 Pokemon Store. Todos los derechos reservados.</p>
         </div>
     </footer>
 

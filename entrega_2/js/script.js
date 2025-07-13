@@ -1,173 +1,166 @@
-// Creacion de los perfumes
-const perfumes = [
-    {
-        id: 1,
-        brand: "Chanel",
-        name: "No. 5",
-        description: "Un clásico atemporal con notas florales y aldehídos.",
-        price: 145,
-        category: "mujer",
-        image: "images/chanel_5.jpg"
-    },
-    {
-        id: 2,
-        brand: "Dior",
-        name: "Sauvage",
-        description: "Fragancia masculina fresca y especiada.",
-        price: 160,
-        category: "hombre",
-        image: "images/dior_sauvage.webp"
-    },
-    {
-        id: 3,
-        brand: "Tom Ford",
-        name: "Black Orchid",
-        description: "Perfume unisex lujoso con notas oscuras y sensuales.",
-        price: 150,
-        category: "unisex",
-        image: "images/tom_ford_blacj_orchid.avif"
-    },
-    {
-        id: 4,
-        brand: "Versace",
-        name: "Bright Crystal",
-        description: "Fragancia femenina brillante y floral.",
-        price: 75,
-        category: "mujer",
-        image: "images/versace_bright_cristal.webp"
-    },
-    {
-        id: 5,
-        brand: "Giorgio Armani",
-        name: "Acqua di Gio",
-        description: "Perfume masculino acuático y refrescante.",
-        price: 90,
-        category: "hombre",
-        image: "images/acqua_di_gio.webp"
-    },
-    {
-        id: 6,
-        brand: "Yves Saint Laurent",
-        name: "Black Opium",
-        description: "Fragancia femenina adictiva con café y vainilla.",
-        price: 110,
-        category: "mujer",
-        image: "images/ysl_black_opium.webp"
-    },
-    {
-        id: 7,
-        brand: "Paco Rabanne",
-        name: "1 Million",
-        description: "Perfume masculino dorado y seductor.",
-        price: 85,
-        category: "hombre",
-        image: "images/paco_1_mill.webp"
-    },
-    {
-        id: 8,
-        brand: "Maison Margiela",
-        name: "REPLICA Beach Walk",
-        description: "Fragancia unisex que evoca paseos por la playa.",
-        price: 130,
-        category: "unisex",
-        image: "images/maison_replica.webp"
-    },
-    {
-        id: 9,
-        brand: "Chanel",
-        name: "Bleu de Chanel",
-        description: "Una fragancia elegante, amaderada y aromática con notas de incienso, cítricos y sándalo",
-        price: 135,
-        category: "hombre",
-        image: "images/bleu_chanel.webp"
-    },
-    {
-      id: 10,
-      brand: "Versace",
-      name: "Eros Flame",
-      description: "Un perfume intenso y apasionado, con notas especiadas y amaderadas mezcladas con cítricos.",
-      price: 75,
-      category: "hombre",
-      image: "images/versace_eros.webp"
-    },
-    {
-      id: 11,
-      brand: "Lancôme",
-      name: "La Vie Est Belle",
-      description: "Una fragancia femenina, dulce y luminosa, con notas de vainilla, praliné y flor de iris.",
-      price: 115,
-      category: "mujer",
-      image: "images/lancome_la_vie.jpg"
-    },
-    {
-      id: 12,
-      brand: "Tom Ford",
-      name: "Soleil Blanc",
-      description: "Un perfume solar, cálido y exótico, con notas de coco, ylang-ylang y ámbar.",
-      price: 135,
-      category: "unisex",
-      image: "images/tom_ford_soleil.webp"
-    }
-];
+// URL base de la API
+const API_BASE_URL = 'https://pokeapi.co/api/v2/pokemon/';
 
-// Array de mi carrito
-let cart = JSON.parse(localStorage.getItem('perfumeCart')) || [];
+// Endpoints
+const POKEMON_ENDPOINT = 'https://pokeapi.co/api/v2/pokemon/';
+const POKEMON_LIST_ENDPOINT = 'https://pokeapi.co/api/v2/pokemon?limit=151&offset=0';
+
+// Array de pokemons y carrito
+let pokemons = [];
+let cart = JSON.parse(localStorage.getItem('pokemonCart')) || [];
 
 // Elementos del DOM
-const productsGrid = document.getElementById('products-grid');
+const pokemonsGrid = document.getElementById('pokemons-grid');
 const cartItems = document.getElementById('cart-items');
 const cartTotal = document.getElementById('cart-total');
 const cartCount = document.getElementById('cart-count');
 const cartSection = document.getElementById('cart');
 const cartOverlay = document.getElementById('cart-overlay');
 const closeCartBtn = document.getElementById('close-cart');
-const filterButtons = document.querySelectorAll('.filter-btn');
+const typeFilter = document.getElementById('type-filter');
+const scrollToProductsBtn = document.getElementById('scroll-to-products-btn');
+const checkoutBtn = document.getElementById('checkout-btn');
+const clearCartBtn = document.getElementById('clear-cart-btn');
+const searchInput = document.getElementById('search-input');
+const searchButton = document.getElementById('search-button');
+
+// Mapeo de tipos de Pokemon en español
+const typeTranslations = {
+    'normal': 'normal',
+    'fire': 'fuego',
+    'water': 'agua',
+    'electric': 'electrico',
+    'grass': 'planta',
+    'ice': 'hielo',
+    'fighting': 'lucha',
+    'poison': 'veneno',
+    'ground': 'tierra',
+    'flying': 'volador',
+    'psychic': 'psiquico',
+    'bug': 'bicho',
+    'rock': 'roca',
+    'ghost': 'fantasma',
+    'dragon': 'dragon',
+    'dark': 'siniestro',
+    'steel': 'acero',
+    'fairy': 'hada'
+};
 
 // Inicializacion de la app
-document.addEventListener('DOMContentLoaded', function() {
-    displayProducts(perfumes);
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadPokemons();
+    displayProducts(pokemons);
     updateCart();
     setupEventListeners();
 });
 
+// Función para cargar los pokemons desde la API
+async function loadPokemons() {
+    try {
+        showLoadingMessage();
+        const response = await fetch(POKEMON_LIST_ENDPOINT);
+        const data = await response.json();
+        
+        // Obtener detalles de cada Pokemon
+        const pokemonPromises = data.results.map(async (pokemon, index) => {
+            const pokemonResponse = await fetch(pokemon.url);
+            const pokemonData = await pokemonResponse.json();
+            
+            // Calcular precio basado en stats (más realista)
+            const basePrice = pokemonData.base_experience || 100;
+            const price = Math.floor(basePrice / 10) * 10; // Redondear a decenas
+            
+            return {
+                id: pokemonData.id,
+                name: pokemonData.name,
+                image: pokemonData.sprites.front_default,
+                price: price,
+                type: pokemonData.types[0].type.name,
+                typeSpanish: typeTranslations[pokemonData.types[0].type.name] || pokemonData.types[0].type.name,
+                height: pokemonData.height,
+                weight: pokemonData.weight,
+                abilities: pokemonData.abilities.map(ability => ability.ability.name).join(', '),
+                stats: pokemonData.stats
+            };
+        });
+        
+        pokemons = await Promise.all(pokemonPromises);
+        populateTypeFilter();
+        hideLoadingMessage();
+        
+    } catch (error) {
+        console.error('Error loading pokemons:', error);
+        hideLoadingMessage();
+        showErrorMessage('Error al cargar los Pokemons. Por favor, recarga la página.');
+    }
+}
+
+// Función para mostrar mensaje de carga
+function showLoadingMessage() {
+    if (pokemonsGrid) {
+        pokemonsGrid.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Cargando Pokemons...</div>';
+    }
+}
+
+// Función para ocultar mensaje de carga
+function hideLoadingMessage() {
+    // Se ocultará cuando se muestren los productos
+}
+
+// Función para mostrar mensaje de error
+function showErrorMessage(message) {
+    if (pokemonsGrid) {
+        pokemonsGrid.innerHTML = `<div style="text-align: center; padding: 2rem; color: #e74c3c;">${message}</div>`;
+    }
+}
+
 // Funcion para mostrar los productos
-function displayProducts(productsToShow = perfumes) {
-    productsGrid.innerHTML = '';
+function displayProducts(productsToShow = pokemons) {
+    if (!pokemonsGrid) return;
     
-    productsToShow.forEach(perfume => {
+    pokemonsGrid.innerHTML = '';
+    
+    if (productsToShow.length === 0) {
+        pokemonsGrid.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">No se encontraron Pokemons.</div>';
+        return;
+    }
+    
+    productsToShow.forEach(pokemon => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
         
         productCard.innerHTML = `
             <div class="product-image">
-                <img src="${perfume.image}" alt="${perfume.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 3rem; background: #f8f8f8;">🌸</div>
+                <img src="${pokemon.image}" alt="${pokemon.name}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 3rem; background: #f8f8f8;">⚡</div>
             </div>
             <div class="product-info">
-                <div class="product-brand">${perfume.brand}</div>
-                <h3 class="product-name">${perfume.name}</h3>
-                <p class="product-description">${perfume.description}</p>
-                <div class="product-price">$${perfume.price}</div>
-                <button class="add-to-cart-btn" onclick="addToCart(${perfume.id})">
+                <div class="product-brand">Tipo: ${pokemon.typeSpanish}</div>
+                <h3 class="product-name">${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}</h3>
+                <p class="product-description">Altura: ${pokemon.height/10}m | Peso: ${pokemon.weight/10}kg<br>Habilidades: ${pokemon.abilities}</p>
+                <div class="product-price">$${pokemon.price}</div>
+                <button class="add-to-cart-btn" data-pokemon-id="${pokemon.id}">
                     Agregar al Carrito
                 </button>
             </div>
         `;
         
-        productsGrid.appendChild(productCard);
+        pokemonsGrid.appendChild(productCard);
     });
 }
 
 // Funcion para agregar al carrito
 function addToCart(productId) {
-    const perfume = perfumes.find(p => p.id === productId);
+    const pokemon = pokemons.find(p => p.id === productId);
+    if (!pokemon) return;
+    
     const existingItem = cart.find(item => item.id === productId);
     
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
         cart.push({
-            ...perfume,
+            ...pokemon,
             quantity: 1
         });
     }
@@ -181,16 +174,16 @@ function addToCart(productId) {
 function updateCart() {
     // Update cart count
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartCount.textContent = totalItems;
+    if (cartCount) cartCount.textContent = totalItems;
     
     // Funcion para actualizar los items del carrito
     if (cart.length === 0) {
-        cartItems.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 2rem;">Tu carrito está vacío</p>';
-        cartTotal.textContent = '0.00';
+        if (cartItems) cartItems.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 2rem;">Tu carrito está vacío</p>';
+        if (cartTotal) cartTotal.textContent = '0.00';
         return;
     }
     
-    cartItems.innerHTML = '';
+    if (cartItems) cartItems.innerHTML = '';
     let total = 0;
     
     cart.forEach(item => {
@@ -199,22 +192,22 @@ function updateCart() {
         cartItem.innerHTML = `
             <div class="cart-item-image">
                 <img src="${item.image}" alt="${item.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="fallback-emoji" style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 2rem; color: #999;">🌸</div>
+                <div class="fallback-emoji" style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 2rem; color: #999;">⚡</div>
             </div>
             <div class="cart-item-details">
                 <div class="cart-item-info">
-                    <h4>${item.brand} - ${item.name}</h4>
+                    <h4>${item.name.charAt(0).toUpperCase() + item.name.slice(1)} - ${item.typeSpanish}</h4>
                     <p>Cantidad: ${item.quantity}</p>
                 </div>
                 <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
-                <button onclick="removeFromCart(${item.id})">Eliminar</button>
+                <button class="remove-from-cart-btn" data-pokemon-id="${item.id}">Eliminar</button>
             </div>
         `;
-        cartItems.appendChild(cartItem);
+        if (cartItems) cartItems.appendChild(cartItem);
         total += item.price * item.quantity;
     });
     
-    cartTotal.textContent = total.toFixed(2);
+    if (cartTotal) cartTotal.textContent = total.toFixed(2);
 }
 
 // Funcion para eliminar del carrito
@@ -249,7 +242,7 @@ function checkout() {
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const itemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
     
-    alert(`¡Gracias por tu compra!\n\nResumen:\n${itemsCount} productos\nTotal: $${total.toFixed(2)}\n\nTu pedido será procesado en breve.`);
+    alert(`¡Gracias por tu compra!\n\nResumen:\n${itemsCount} Pokemons\nTotal: $${total.toFixed(2)}\n\nTus Pokemons serán entregados pronto.`);
     
     cart = [];
     updateCart();
@@ -259,54 +252,169 @@ function checkout() {
 
 // Funcion para guardar el carrito en localStorage
 function saveCartToStorage() {
-    localStorage.setItem('perfumeCart', JSON.stringify(cart));
+    localStorage.setItem('pokemonCart', JSON.stringify(cart));
 }
 
 // Funcion para filtrar los productos
 function filterProducts(category) {
     const filteredProducts = category === 'all' 
-        ? perfumes 
-        : perfumes.filter(perfume => perfume.category === category);
+        ? pokemons 
+        : pokemons.filter(pokemon => pokemon.typeSpanish === category);
     
     displayProducts(filteredProducts);
 }
 
 // Funcion para abrir el carrito
 function openCart() {
-    cartSection.classList.add('open');
-    cartOverlay.classList.add('active');
+    if (cartSection) cartSection.classList.add('open');
+    if (cartOverlay) cartOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
 // Funcion para cerrar el carrito
 function closeCart() {
-    cartSection.classList.remove('open');
-    cartOverlay.classList.remove('active');
+    if (cartSection) cartSection.classList.remove('open');
+    if (cartOverlay) cartOverlay.classList.remove('active');
     document.body.style.overflow = 'auto';
+}
+
+// Función para poblar el dropdown de tipos
+function populateTypeFilter() {
+    if (!typeFilter) return;
+    
+    // Obtener tipos únicos de los Pokemon cargados
+    const uniqueTypes = [...new Set(pokemons.map(pokemon => pokemon.typeSpanish))];
+    
+    // Ordenar alfabéticamente
+    uniqueTypes.sort();
+    
+    // Limpiar opciones existentes (excepto "Todos")
+    typeFilter.innerHTML = '<option value="all">Todos</option>';
+    
+    // Agregar cada tipo único como opción
+    uniqueTypes.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+        typeFilter.appendChild(option);
+    });
+}
+
+// Función para buscar Pokemon por nombre o ID
+function searchPokemons(query) {
+    if (!query.trim()) {
+        // Si no hay query, mostrar todos los Pokemon
+        displayProducts(pokemons);
+        return;
+    }
+    
+    const searchTerm = query.toLowerCase().trim();
+    const filteredPokemons = pokemons.filter(pokemon => {
+        // Buscar por nombre
+        const nameMatch = pokemon.name.toLowerCase().includes(searchTerm);
+        
+        // Buscar por ID (convertir query a número si es posible)
+        const idMatch = !isNaN(searchTerm) && pokemon.id.toString() === searchTerm;
+        
+        return nameMatch || idMatch;
+    });
+    
+    displayProducts(filteredPokemons);
+    
+    // Resetear filtro de tipo
+    if (typeFilter) typeFilter.value = 'all';
 }
 
 // Funcion para configurar los event listeners
 function setupEventListeners() {
-    filterButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            const category = button.getAttribute('data-filter');
-            filterProducts(category);
+    // Type filter dropdown
+    if (typeFilter) {
+        typeFilter.addEventListener('change', (e) => {
+            const selectedType = e.target.value;
+            filterProducts(selectedType);
+            
+            // Limpiar búsqueda cuando se usa filtro
+            if (searchInput) searchInput.value = '';
         });
-    });
+    }
     
-    document.getElementById('cart-link').addEventListener('click', (e) => {
-        e.preventDefault();
-        openCart();
-    });
+    // Search functionality
+    if (searchButton) {
+        searchButton.addEventListener('click', () => {
+            const query = searchInput ? searchInput.value : '';
+            searchPokemons(query);
+        });
+    }
+    
+    if (searchInput) {
+        // Buscar al presionar Enter
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchPokemons(searchInput.value);
+            }
+        });
+        
+        // Búsqueda en tiempo real (opcional)
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value;
+            if (query.length === 0) {
+                // Si se borra todo, mostrar todos los Pokemon
+                displayProducts(pokemons);
+            } else if (query.length >= 2) {
+                // Buscar cuando hay al menos 2 caracteres
+                searchPokemons(query);
+            }
+        });
+    }
+    
+    // Cart link
+    const cartLink = document.getElementById('cart-link');
+    if (cartLink) {
+        cartLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            openCart();
+        });
+    }
 
-    closeCartBtn.addEventListener('click', closeCart);
+    // Close cart button
+    if (closeCartBtn) closeCartBtn.addEventListener('click', closeCart);
     
-    cartOverlay.addEventListener('click', closeCart);
+    // Cart overlay
+    if (cartOverlay) cartOverlay.addEventListener('click', closeCart);
     
+    // Scroll to products button
+    if (scrollToProductsBtn) {
+        scrollToProductsBtn.addEventListener('click', scrollToProducts);
+    }
+    
+    // Checkout button
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', checkout);
+    }
+    
+    // Clear cart button
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', clearCart);
+    }
+    
+    // Event delegation for dynamically created buttons
+    document.addEventListener('click', (e) => {
+        // Handle add to cart buttons
+        if (e.target.classList.contains('add-to-cart-btn')) {
+            const pokemonId = parseInt(e.target.getAttribute('data-pokemon-id'));
+            addToCart(pokemonId);
+        }
+        
+        // Handle remove from cart buttons
+        if (e.target.classList.contains('remove-from-cart-btn')) {
+            const pokemonId = parseInt(e.target.getAttribute('data-pokemon-id'));
+            removeFromCart(pokemonId);
+        }
+    });
+    
+    // Keyboard events
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && cartSection.classList.contains('open')) {
+        if (e.key === 'Escape' && cartSection && cartSection.classList.contains('open')) {
             closeCart();
         }
     });
@@ -328,21 +436,24 @@ function setupEventListeners() {
 
 // Scroll a los productos
 function scrollToProducts() {
-    document.getElementById('products').scrollIntoView({
-        behavior: 'smooth'
-    });
+    const pokemonsSection = document.getElementById('pokemons');
+    if (pokemonsSection) {
+        pokemonsSection.scrollIntoView({
+            behavior: 'smooth'
+        });
+    }
 }
 
 // Mostrar notificacion de producto agregado al carrito
 function showAddedToCartNotification() {
     // Crear notificacion temporal
     const notification = document.createElement('div');
-    notification.innerHTML = '✅ Producto agregado al carrito';
+    notification.innerHTML = '✅ Pokemon agregado al carrito';
     notification.style.cssText = `
         position: fixed;
         top: 100px;
         right: 20px;
-        background: grey;
+        background: #27ae60;
         color: white;
         padding: 0.75rem 1.5rem;
         border-radius: 4px;
