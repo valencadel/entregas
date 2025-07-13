@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokemon Store - Marketplace</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script defer src="js/script.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
 </head>
 <body>
     <header class="header">
@@ -16,9 +20,9 @@
             </div>
             <nav class="nav">
                 <ul>
-                    <li><a href="#home">Inicio</a></li>
-                    <li><a href="#pokemons">Pokemons</a></li>
-                    <li><a href="#cart" id="cart-link">Carrito (<span id="cart-count">0</span>)</a></li>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#pokemons">Pokemon</a></li>
+                    <li><a href="#cart" id="cart-link">Cart (<span id="cart-count">0</span>)</a></li>
                 </ul>
             </nav>
         </div>
@@ -29,8 +33,8 @@
             <div class="container">
                 <div class="hero-content">
                     <h2>Gotta Catch 'Em All!</h2>
-                    <p>Explora nuestra tienda de Pokemons!</p>
-                    <button class="cta-button" id="scroll-to-products-btn">Ver Pokemons</button>
+                    <p>Explore our Pokemon store!</p>
+                    <button class="cta-button" id="scroll-to-products-btn">View Pokemon</button>
                 </div>
             </div>
         </section>
@@ -39,47 +43,47 @@
             <div class="container">
                 <h2 class="section-title"></h2>
                 <div class="pokemons-container">
-                    <input type="text" id="search-input" placeholder="Ingresar nombre o ID">
-                    <button id="search-button">Buscar</button>
+                    <input type="text" id="search-input" placeholder="Enter name or ID">
+                    <button id="search-button">Search</button>
                 </div>
                 <div class="filters">
-                    <label for="type-filter">Filtrar por tipo:</label>
+                    <label for="type-filter">Filter by type:</label>
                     <select id="type-filter" class="filter-dropdown">
-                        <option value="all">Todos</option>
+                        <option value="all">All</option>
                         <!-- Types will be loaded dynamically -->
                     </select>
                 </div>
                 <div class="pokemons-grid" id="pokemons-grid">
-                    <!-- ACA SE CARGAN LOS PRODUCTOS -->
+                    <!-- Pokemon will be loaded here -->
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- CARRITO SIDEBAR -->
+    <!-- CART SIDEBAR -->
     <div class="cart-overlay" id="cart-overlay"></div>
     <aside class="cart-section" id="cart">
         <div class="cart-header">
-            <h2>Tu Carrito</h2>
+            <h2>Your Cart</h2>
             <button class="close-cart" id="close-cart">&times;</button>
         </div>
         <div id="cart-items" class="cart-items">
-            <!-- ACA SE CARGAN LOS ITEMS DEL CARRITO -->
+            <!-- Cart items will be loaded here -->
         </div>
         <div class="cart-footer">
             <div class="cart-total">
                 <h3>Total: $<span id="cart-total">0</span></h3>
             </div>
             <div class="cart-buttons">
-                <button class="checkout-btn" id="checkout-btn">Finalizar Compra</button>
-                <button class="clear-cart-btn" id="clear-cart-btn">Vaciar Carrito</button>
+                <button class="checkout-btn" id="checkout-btn">Checkout</button>
+                <button class="clear-cart-btn" id="clear-cart-btn">Clear Cart</button>
             </div>
         </div>
     </aside>
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 Pokemon Store. Todos los derechos reservados.</p>
+            <p>&copy; 2024 Pokemon Store. All rights reserved.</p>
         </div>
     </footer>
 

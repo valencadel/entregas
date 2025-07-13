@@ -24,28 +24,6 @@ const clearCartBtn = document.getElementById('clear-cart-btn');
 const searchInput = document.getElementById('search-input');
 const searchButton = document.getElementById('search-button');
 
-// Mapeo de tipos de Pokemon en español
-const typeTranslations = {
-    'normal': 'normal',
-    'fire': 'fuego',
-    'water': 'agua',
-    'electric': 'electrico',
-    'grass': 'planta',
-    'ice': 'hielo',
-    'fighting': 'lucha',
-    'poison': 'veneno',
-    'ground': 'tierra',
-    'flying': 'volador',
-    'psychic': 'psiquico',
-    'bug': 'bicho',
-    'rock': 'roca',
-    'ghost': 'fantasma',
-    'dragon': 'dragon',
-    'dark': 'siniestro',
-    'steel': 'acero',
-    'fairy': 'hada'
-};
-
 // Inicializacion de la app
 document.addEventListener('DOMContentLoaded', async function() {
     await loadPokemons();
@@ -75,8 +53,7 @@ async function loadPokemons() {
                 name: pokemonData.name,
                 image: pokemonData.sprites.front_default,
                 price: price,
-                type: pokemonData.types[0].type.name,
-                typeSpanish: typeTranslations[pokemonData.types[0].type.name] || pokemonData.types[0].type.name,
+                types: pokemonData.types.map(type => type.type.name),
                 height: pokemonData.height,
                 weight: pokemonData.weight,
                 abilities: pokemonData.abilities.map(ability => ability.ability.name).join(', '),
@@ -91,14 +68,14 @@ async function loadPokemons() {
     } catch (error) {
         console.error('Error loading pokemons:', error);
         hideLoadingMessage();
-        showErrorMessage('Error al cargar los Pokemons. Por favor, recarga la página.');
+        showErrorMessage('Error loading Pokemon. Please reload the page.');
     }
 }
 
 // Función para mostrar mensaje de carga
 function showLoadingMessage() {
     if (pokemonsGrid) {
-        pokemonsGrid.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Cargando Pokemons...</div>';
+        pokemonsGrid.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Loading Pokemon...</div>';
     }
 }
 
@@ -121,7 +98,7 @@ function displayProducts(productsToShow = pokemons) {
     pokemonsGrid.innerHTML = '';
     
     if (productsToShow.length === 0) {
-        pokemonsGrid.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">No se encontraron Pokemons.</div>';
+        pokemonsGrid.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">No Pokemon found.</div>';
         return;
     }
     
@@ -135,12 +112,14 @@ function displayProducts(productsToShow = pokemons) {
                 <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 3rem; background: #f8f8f8;">⚡</div>
             </div>
             <div class="product-info">
-                <div class="product-brand">Tipo: ${pokemon.typeSpanish}</div>
+                <div class="product-types">
+                    ${pokemon.types.map(type => `<span class="type-badge" data-type="${type}">${type}</span>`).join('')}
+                </div>
                 <h3 class="product-name">${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}</h3>
-                <p class="product-description">Altura: ${pokemon.height/10}m | Peso: ${pokemon.weight/10}kg<br>Habilidades: ${pokemon.abilities}</p>
+                <p class="product-description">Height: ${pokemon.height/10}m | Weight: ${pokemon.weight/10}kg<br>Abilities: ${pokemon.abilities}</p>
                 <div class="product-price">$${pokemon.price}</div>
                 <button class="add-to-cart-btn" data-pokemon-id="${pokemon.id}">
-                    Agregar al Carrito
+                    Add to Cart
                 </button>
             </div>
         `;
@@ -150,24 +129,45 @@ function displayProducts(productsToShow = pokemons) {
 }
 
 // Funcion para agregar al carrito
-function addToCart(productId) {
+async function addToCart(productId) {
     const pokemon = pokemons.find(p => p.id === productId);
     if (!pokemon) return;
     
-    const existingItem = cart.find(item => item.id === productId);
+    // Mostrar confirmación con SweetAlert
+    const result = await Swal.fire({
+        title: 'Add ' + pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1) + ' to cart?',
+        text: `Are you sure you want to add ${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)} to your cart?`,
+        imageUrl: pokemon.image,
+        imageWidth: 250,
+        imageHeight: 250,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3498db',
+        cancelButtonColor: '#95a5a6',
+        confirmButtonText: 'Yes, add it',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            popup: 'pokemon-swal-popup'
+        }
+    });
     
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({
-            ...pokemon,
-            quantity: 1
-        });
+    // Si el usuario confirma, agregar al carrito
+    if (result.isConfirmed) {
+        const existingItem = cart.find(item => item.id === productId);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push({
+                ...pokemon,
+                quantity: 1
+            });
+        }
+        
+        updateCart();
+        saveCartToStorage();
+        showToastifyNotification(pokemon.name);
     }
-    
-    updateCart();
-    saveCartToStorage();
-    showAddedToCartNotification();
 }
 
 // Funcion para actualizar el carrito
@@ -178,7 +178,7 @@ function updateCart() {
     
     // Funcion para actualizar los items del carrito
     if (cart.length === 0) {
-        if (cartItems) cartItems.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 2rem;">Tu carrito está vacío</p>';
+        if (cartItems) cartItems.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 2rem;">Your cart is empty</p>';
         if (cartTotal) cartTotal.textContent = '0.00';
         return;
     }
@@ -196,11 +196,11 @@ function updateCart() {
             </div>
             <div class="cart-item-details">
                 <div class="cart-item-info">
-                    <h4>${item.name.charAt(0).toUpperCase() + item.name.slice(1)} - ${item.typeSpanish}</h4>
-                    <p>Cantidad: ${item.quantity}</p>
+                    <h4>${item.name.charAt(0).toUpperCase() + item.name.slice(1)} - ${item.types.join(', ')}</h4>
+                    <p>Quantity: ${item.quantity}</p>
                 </div>
                 <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
-                <button class="remove-from-cart-btn" data-pokemon-id="${item.id}">Eliminar</button>
+                <button class="remove-from-cart-btn" data-pokemon-id="${item.id}">Remove</button>
             </div>
         `;
         if (cartItems) cartItems.appendChild(cartItem);
@@ -218,31 +218,91 @@ function removeFromCart(productId) {
 }
 
 // Funcion para vaciar el carrito
-function clearCart() {
+async function clearCart() {
     if (cart.length === 0) {
-        alert('El carrito ya está vacío');
+        Swal.fire({
+            title: 'Cart is empty',
+            text: 'Your cart is already empty',
+            icon: 'info',
+            confirmButtonColor: '#3498db',
+            confirmButtonText: 'Got it',
+            customClass: {
+                popup: 'pokemon-swal-popup'
+            }
+        });
         return;
     }
     
-    if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
+    const result = await Swal.fire({
+        title: 'Clear cart?',
+        text: 'Are you sure you want to clear your cart?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#95a5a6',
+        confirmButtonText: 'Yes, clear it',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            popup: 'pokemon-swal-popup'
+        }
+    });
+    
+    if (result.isConfirmed) {
         cart = [];
         updateCart();
         saveCartToStorage();
-        alert('Carrito vaciado correctamente');
+        
+        Swal.fire({
+            title: 'Cart cleared!',
+            text: 'Your cart has been cleared successfully',
+            icon: 'success',
+            confirmButtonColor: '#27ae60',
+            confirmButtonText: 'Perfect',
+            timer: 2000,
+            customClass: {
+                popup: 'pokemon-swal-popup'
+            }
+        });
     }
 }
 
 // Funcion para checkout
-function checkout() {
+async function checkout() {
     if (cart.length === 0) {
-        alert('Tu carrito está vacío');
+        Swal.fire({
+            title: 'Cart is empty',
+            text: 'Your cart is empty',
+            icon: 'info',
+            confirmButtonColor: '#3498db',
+            confirmButtonText: 'Got it',
+            customClass: {
+                popup: 'pokemon-swal-popup'
+            }
+        });
         return;
     }
     
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const itemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
     
-    alert(`¡Gracias por tu compra!\n\nResumen:\n${itemsCount} Pokemons\nTotal: $${total.toFixed(2)}\n\nTus Pokemons serán entregados pronto.`);
+    const result = await Swal.fire({
+        title: 'Thank you for your purchase!',
+        html: `
+            <div style="text-align: left; margin: 20px 0;">
+                <p><strong>Summary:</strong></p>
+                <p>📦 ${itemsCount} Pokemon</p>
+                <p>💰 Total: $${total.toFixed(2)}</p>
+                <br>
+                <p style="color: #27ae60;">🚚 Your Pokemon will be delivered soon.</p>
+            </div>
+        `,
+        icon: 'success',
+        confirmButtonColor: '#27ae60',
+        confirmButtonText: 'Awesome!',
+        customClass: {
+            popup: 'pokemon-swal-popup'
+        }
+    });
     
     cart = [];
     updateCart();
@@ -259,7 +319,7 @@ function saveCartToStorage() {
 function filterProducts(category) {
     const filteredProducts = category === 'all' 
         ? pokemons 
-        : pokemons.filter(pokemon => pokemon.typeSpanish === category);
+        : pokemons.filter(pokemon => pokemon.types.includes(category));
     
     displayProducts(filteredProducts);
 }
@@ -283,13 +343,13 @@ function populateTypeFilter() {
     if (!typeFilter) return;
     
     // Obtener tipos únicos de los Pokemon cargados
-    const uniqueTypes = [...new Set(pokemons.map(pokemon => pokemon.typeSpanish))];
+    const uniqueTypes = [...new Set(pokemons.flatMap(pokemon => pokemon.types))];
     
     // Ordenar alfabéticamente
     uniqueTypes.sort();
     
-    // Limpiar opciones existentes (excepto "Todos")
-    typeFilter.innerHTML = '<option value="all">Todos</option>';
+    // Limpiar opciones existentes (excepto "All")
+    typeFilter.innerHTML = '<option value="all">All</option>';
     
     // Agregar cada tipo único como opción
     uniqueTypes.forEach(type => {
@@ -389,20 +449,24 @@ function setupEventListeners() {
     
     // Checkout button
     if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', checkout);
+        checkoutBtn.addEventListener('click', async () => {
+            await checkout();
+        });
     }
     
     // Clear cart button
     if (clearCartBtn) {
-        clearCartBtn.addEventListener('click', clearCart);
+        clearCartBtn.addEventListener('click', async () => {
+            await clearCart();
+        });
     }
     
     // Event delegation for dynamically created buttons
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', async (e) => {
         // Handle add to cart buttons
         if (e.target.classList.contains('add-to-cart-btn')) {
             const pokemonId = parseInt(e.target.getAttribute('data-pokemon-id'));
-            addToCart(pokemonId);
+            await addToCart(pokemonId);
         }
         
         // Handle remove from cart buttons
@@ -444,43 +508,22 @@ function scrollToProducts() {
     }
 }
 
-// Mostrar notificacion de producto agregado al carrito
-function showAddedToCartNotification() {
-    // Crear notificacion temporal
-    const notification = document.createElement('div');
-    notification.innerHTML = '✅ Pokemon agregado al carrito';
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        background: #27ae60;
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 4px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 10000;
-        font-weight: 500;
-        opacity: 0;
-        transform: translateX(100%);
-        transition: all 0.3s ease;
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Mostrar la notificaion al agregar algo al carrito
-    setTimeout(() => {
-        notification.style.opacity = '1';
-        notification.style.transform = 'translateX(0)';
-    }, 100);
-    
-    // Eliminar notificacion despues de un segundo y medio
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateX(100%)';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 1500);
+// Mostrar notificacion de producto agregado al carrito con Toastify
+function showToastifyNotification(pokemonName) {
+    Toastify({
+        text: `✅ ${pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1)} added to cart`,
+        duration: 1500,
+        gravity: "top",
+        position: "right",
+        style: {
+            background: "linear-gradient(to right, #27ae60, #2ecc71)",
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            fontWeight: "500"
+        },
+        onClick: function(){
+            // Abrir carrito al hacer click en la notificación
+            openCart();
+        }
+    }).showToast();
 }

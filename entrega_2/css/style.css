@@ -272,6 +272,50 @@ body {
     margin-bottom: 0.5rem;
 }
 
+.product-types {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.type-badge {
+    background: #3498db;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.type-badge:nth-child(1) { background: #3498db; }
+.type-badge:nth-child(2) { background: #e74c3c; }
+.type-badge:nth-child(3) { background: #f39c12; }
+
+/* Pokemon type colors */
+.type-badge[data-type="fire"] { background: #e74c3c; }
+.type-badge[data-type="water"] { background: #3498db; }
+.type-badge[data-type="grass"] { background: #27ae60; }
+.type-badge[data-type="electric"] { background: #f1c40f; color: #2c3e50; }
+.type-badge[data-type="psychic"] { background: #e91e63; }
+.type-badge[data-type="ice"] { background: #85c1e9; color: #2c3e50; }
+.type-badge[data-type="dragon"] { background: #8e44ad; }
+.type-badge[data-type="dark"] { background: #34495e; }
+.type-badge[data-type="fairy"] { background: #f8c6d4; color: #2c3e50; }
+.type-badge[data-type="fighting"] { background: #d35400; }
+.type-badge[data-type="poison"] { background: #9b59b6; }
+.type-badge[data-type="ground"] { background: #d68910; }
+.type-badge[data-type="flying"] { background: #5dade2; }
+.type-badge[data-type="bug"] { background: #82e0aa; color: #2c3e50; }
+.type-badge[data-type="rock"] { background: #85929e; }
+.type-badge[data-type="ghost"] { background: #6c5ce7; }
+.type-badge[data-type="steel"] { background: #99a3a4; }
+.type-badge[data-type="normal"] { background: #bdc3c7; color: #2c3e50; }
+
 .product-name {
     font-size: 1.25rem;
     margin: 0.5rem 0;
@@ -526,6 +570,90 @@ body {
     .pokemons-grid {
         grid-template-columns: repeat(3, 1fr);
     }
+}
+
+/* CUSTOM SWEETALERT STYLES */
+.pokemon-swal-popup {
+    font-family: Arial, sans-serif !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2) !important;
+}
+
+.pokemon-swal-popup .swal2-title {
+    color: #333 !important;
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 1rem !important;
+}
+
+.pokemon-swal-popup .swal2-content {
+    color: #666 !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+}
+
+.pokemon-swal-popup .swal2-html-container {
+    color: #666 !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+}
+
+.pokemon-swal-popup .swal2-confirm {
+    background-color: #3498db !important;
+    border: none !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    padding: 10px 20px !important;
+    transition: background-color 0.3s ease !important;
+    margin: 0 5px !important;
+}
+
+.pokemon-swal-popup .swal2-confirm:hover {
+    background-color: #2980b9 !important;
+}
+
+.pokemon-swal-popup .swal2-cancel {
+    background-color: #95a5a6 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    padding: 10px 20px !important;
+    transition: background-color 0.3s ease !important;
+    margin: 0 5px !important;
+}
+
+.pokemon-swal-popup .swal2-cancel:hover {
+    background-color: #7f8c8d !important;
+}
+
+/* Different button colors for different alert types */
+.pokemon-swal-popup .swal2-confirm.swal2-styled[style*="background-color: rgb(231, 76, 60)"] {
+    background-color: #e74c3c !important;
+}
+
+.pokemon-swal-popup .swal2-confirm.swal2-styled[style*="background-color: rgb(231, 76, 60)"]:hover {
+    background-color: #c0392b !important;
+}
+
+.pokemon-swal-popup .swal2-confirm.swal2-styled[style*="background-color: rgb(39, 174, 96)"] {
+    background-color: #27ae60 !important;
+}
+
+.pokemon-swal-popup .swal2-confirm.swal2-styled[style*="background-color: rgb(39, 174, 96)"]:hover {
+    background-color: #219a52 !important;
+}
+
+.pokemon-swal-popup .swal2-icon {
+    margin: 1rem auto !important;
+}
+
+.pokemon-swal-popup .swal2-actions {
+    margin-top: 1.5rem !important;
+}
+
+/* CUSTOM TOASTIFY STYLES */
+.toastify {
+    font-family: Arial, sans-serif !important;
 }
 
 @media (max-width: 900px) {
